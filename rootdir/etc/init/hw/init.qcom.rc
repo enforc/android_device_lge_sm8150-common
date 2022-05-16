@@ -34,8 +34,6 @@ import /vendor/etc/init/hw/init.qcom.factory.rc
 on early-init
     mount debugfs debugfs /sys/kernel/debug
     chmod 0755 /sys/kernel/debug
-    mount tracefs tracefs /sys/kernel/tracing
-    chmod 0755 /sys/kernel/tracing
 
   # create symlink for vendor mount points
     symlink /vendor/firmware_mnt /firmware
@@ -417,6 +415,9 @@ on post-fs-data
 on property:vold.decrypt=trigger_load_persist_props
     #LGE - Start time daemon early so that the system time can be set early
     start time_daemon
+
+    # NFC
+    chown nfc nfc /dev/pn55x
 
 service nqnfcinfo /system/vendor/bin/nqnfcinfo
     class late_start
@@ -967,3 +968,7 @@ service zramswapoff /vendor/bin/init.lge.zramswap.sh stop
 	disabled
 	oneshot
 
+on property:sys.boot_completed=1
+    # Restrict permissions to socket file
+    # to hide Magisk & co.
+    chmod 440 /proc/net/unix
